@@ -1,0 +1,41 @@
+import subprocess as s
+import re
+#if(ch==1):
+print("Hadoop Setup")
+IP=list()
+pingname=list()
+print("Name Node details-")
+IP.append(input("Enter IP: "))
+pingname.append(input("Enter the ping name: "))
+print("Client Node details")
+IP.append(input("Enter IP: "))
+pingname.append(input("Enter the ping name: "))
+print("Data Nodes details-")
+num_dn=input("Enter the number of data nodes in the cluster you prefer to have:")
+num_dn=int(num_dn)
+for i in range(num_dn):
+print("Enter the IP and the ping name of data node {}-".format((i+1)))
+IP.append(input('Enter IP: '))
+pingname.append(input('Enter ping name: '))
+print(IP[i+2])
+print(pingname[i+2])
+print("Basic draft ready")
+len_IP=len(IP)
+print("------------------")
+print("SERVER")
+print("------------------")
+print("Let's set up Hadoop")
+print("step-1 : Let's check network connectivity")
+flag_net=True
+for i in range(len_IP):
+output =s.getoutput("ping {} -c1".format(IP[i]))
+if (re.search('ttl',output)):
+print("{} OK".format(pingname[i]))
+else:
+print("Network problem with {}".format(pingname[i]))
+flag_net=False
+if(flag_net==False):
+print(" Please rectify the above errors befor continuing ")
+s.getoutput('exit')
+else:
+print("Congrats Step-1 working fine\n ")

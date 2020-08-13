@@ -1,0 +1,78 @@
+#include <ESP8266WiFi.h>;
+#include <WiFiClient.h>;
+#include <ThingSpeak.h>;
+const char* ssid = "sandhya";
+const char* password = "password1234";
+WiFiClient client;
+unsigned long myChannelNumber = 987641;
+const char * myWriteAPIKey = "IMYD4FHSUTUS3W33";
+const char * myReadAPIKey = "960PH1D9XXLC4ZD4";
+int led_1;
+int led_2;
+int led_3;
+int led_4;
+int ir1 = D0;
+int led1 = D5;
+int led2 = D6;
+int ir3 = D2;
+int led3 = D7;
+int led4 = D8;
+int ldr = A0;
+int val =0;
+void setup() {
+ Serial.begin(9600);
+ //delay(10);
+ pinMode(ir1,INPUT);
+ pinMode(led1,OUTPUT);
+ //pinMode(ir2,INPUT);
+ pinMode(led2,OUTPUT);
+ pinMode(ir3,INPUT);
+ pinMode(led3,OUTPUT);
+ pinMode(led4,OUTPUT);
+ WiFi.begin(ssid, password);
+ ThingSpeak.begin(client);
+}
+void loop() {
+ int s1 = digitalRead(ir1);
+ //int s2 = digitalRead(ir2);
+ s1=not(s1);
+ int s3 = digitalRead(ir3);
+ s3 = not(s3);
+ val = analogRead(ldr);
+ Serial.print(s1);
+ Serial.print(":");
+ //Serial.print(s2);
+ //Serial.print(":");
+ Serial.print(s3);
+ Serial.print(":");
+ Serial.println(val);
+ digitalWrite(led1,LOW);
+ digitalWrite(led2,LOW);
+ digitalWrite(led3,LOW);
+ digitalWrite(led4,LOW);
+ if(val>180)
+ {
+ if(s1==1){
+ digitalWrite(led1,HIGH);
+ digitalWrite(led2,HIGH);
+ }
+ else{
+ digitalWrite(led1,LOW);
+ digitalWrite(led2,LOW);
+ }
+ if(s3==1){
+ digitalWrite(led3,HIGH);
+ digitalWrite(led4,HIGH);
+ }
+ else{
+ digitalWrite(led3,LOW);
+ digitalWrite(led4,LOW);
+ }
+ }
+ else
+ {
+ digitalWrite(led1,LOW);
+ digitalWrite(led2,LOW);
+ digitalWrite(led3,LOW);
+ digitalWrite(led4,LOW);
+ }

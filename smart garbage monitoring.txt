@@ -1,0 +1,87 @@
+#include <FirebaseArduino.h>
+#include <Arduino.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+const char* ssid = "TheAlgo";
+const char* password = "project1234";
+#define FIREBASE_HOST "friendlychat-6bd7a.firebaseio.com"
+#defineFIREBASE_AUTH"WehKXhUO22JG8msnzGJaMXcBZPEke9JxC2BNMvFS"
+#define pin1 D0
+#define pin2 D1
+#define pin3 D2
+#define pin4 D3
+#define pin5 D4
+#define TRIGGER D7
+#define ECHO D8
+long maximum = 40;
+long block = maximum/4;
+bool started = true;
+int id; int led = 0;
+bool blinkAll = false;
+bool blinkOn = false;
+HTTPClient http;
+void setup() {
+Serial.begin(115200);
+Serial.println("started");
+pinMode(pin1, OUTPUT);
+pinMode(pin2, OUTPUT); pinMode(pin3,
+OUTPUT); pinMode(pin4, OUTPUT);
+pinMode(pin5, OUTPUT);
+pinMode(TRIGGER,OUTPUT);
+pinMode(ECHO,INPUT);
+WiFi.begin(ssid, password);
+while (WiFi.status() != WL_CONNECTED) {
+delay(500);
+Serial.print(".");
+}
+Serial.println("");
+Serial.println("WiFi connected");
+Serial.println("IP address: ");
+Serial.println(WiFi.localIP());
+Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+Firebase.setFloat("bin001-max", maximum); if
+(Firebase.failed()) {
+Serial.print("setting /number failed:");
+Serial.println(Firebase.error());
+return;
+}
+}
+int getReading(){
+long duration, distance;
+digitalWrite(TRIGGER, LOW);
+delayMicroseconds(2);
+digitalWrite(TRIGGER, HIGH);
+delayMicroseconds(10);
+digitalWrite(TRIGGER, LOW);
+duration = pulseIn(ECHO, HIGH);
+distance = (duration/2) / 29.1;
+Serial.print(distance);
+Serial.println(" cm");
+return distance;
+}
+void displayLED(byte data){
+digitalWrite(pin1, (data & 0b0001)>>0);
+digitalWrite(pin2, (data & 0b0010)>>1);
+digitalWrite(pin3, (data & 0b0100)>>2);
+digitalWrite(pin4, (data & 0b1000)>>3);
+}
+long lastSent = 0;
+long sendFirebaseInterval = 500;
+void loop() { int dist =
+getReading();
+if(dist > block)blinkAll = false; if(dist >
+maximum)displayLED(0b0001); else
+if(dist > block*3)displayLED(0b0010); else
+if(dist > block*2)displayLED(0b0100); else
+if(dist > block*1)displayLED(0b1000);
+else blinkAll = true;
+if(blinkAll){
+blinkOn = !blinkOn;
+displayLED(blinkOn ? 0b1111 : 0b0000);
+}
+long current = millis();
+if((current - lastSent) >= sendFirebaseInterval){
+Firebase.setFloat("bin001-dist", dist);
+}
+delay(100);
+}

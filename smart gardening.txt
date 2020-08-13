@@ -1,0 +1,46 @@
+#include <SoftwareSerial.h> //including the software serial UART library which will make the digital pins as
+TX and RX
+#include <LiquidCrystal.h>
+#include "DHT.h" //including the DHT22 library
+#define DHTPIN 7 //Declaring pin 8 of arduino to communicate with DHT22
+#define DHTTYPE DHT11 //Defining type of DHT sensor we are using (DHT22 or DHT11)
+#define DEBUG true
+DHT dht(DHTPIN, DHTTYPE); //Declaring a variable named dht
+LiquidCrystal lcd(13, 12, 11, 10, 9, 8);
+SoftwareSerial esp8266(2,3); //Connect the TX pin of ESP8266 to pin 2 of Arduino and RX pin of ESP8266 to
+pin 3 of Arduino.
+SoftwareSerial mySerial(1, 0);
+int motor=A5;
+//const int high = 5;
+//const int low = 4;
+int buz=6;
+float temp_read,Temp_alert_val,Temp_shut_val;
+float temperature, humidity;
+float soil,soill;
+int buttonState1=0;
+int buttonState2=0;
+void setup()
+{
+ Serial.begin(9600);
+ lcd.begin(16,2);
+ mySerial.begin(9600);
+ esp8266.begin(115200); // Set the baud rate of serial communication
+// dht.begin(); //This will initiate receiving data from DHT22
+// pinMode(high, INPUT);
+//pinMode(low, INPUT);
+ pinMode(motor,OUTPUT);
+ pinMode(buz,OUTPUT);
+ sendData("AT+RST\r\n",2000,DEBUG); // Reset the module
+ sendData("AT+CWMODE=2\r\n",1000,DEBUG); // Configure ESP8266 as an access point
+ sendData("AT+CIFSR\r\n",1000,DEBUG); // Get the IP address of ESP8266
+ sendData("AT+CIPMUX=1\r\n",1000,DEBUG); // Configure ESP8266 for multiple connections
+ sendData("AT+CIPSERVER=1,80\r\n",1000,DEBUG); // Start TCP server at port 80
+lcd.setCursor(0,0); // Sets the location at which subsequent text written to the LCD will be displayed
+lcd.print("Tem: ");
+lcd.setCursor(11,0); // Sets the location at which subsequent text written to the LCD will be displayed
+lcd.print("H: ");
+lcd.setCursor(0,1); // Sets the location at which subsequent text written to the LCD will be displayed
+lcd.print("Moist: ");
+//lcd.setCursor(0,1); // Sets the location at which subsequent text written to the LCD will be displayed
+//lcd.print("Animal: ");
+}

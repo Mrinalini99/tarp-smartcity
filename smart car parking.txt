@@ -1,0 +1,76 @@
+#include <Firebase.h>
+#include <FirebaseArduino.h>
+#include <FirebaseCloudMessaging.h>
+#include <FirebaseError.h>
+#include <FirebaseHttpClient.h>
+#include <FirebaseObject.h>
+#include <ESP8266WiFi.h>
+#include <FirebaseArduino.h>
+#define FIREBASE_HOST "trial1-2fb27.firebaseio.com"
+#define FIREBASE_AUTH "ilfI8E06mRrK4DoOvKaXOPwYwEEhWzMuP9yjPTn4"
+#define WIFI_SSID "diksha"
+#define WIFI_PASSWORD "udontneedtoknow"
+const int ProxSensor0=D7;
+int inputVal0 = 0;
+const int ProxSensor1=D6;
+int inputVal1 = 0;
+const int ProxSensor2=D5;
+int inputVal2 = 0;
+const int ProxSensor3=D2 ;
+int inputVal3 = 0;
+void setup() {
+ Serial.begin(9600);
+ // connect to wifi.
+ WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+ Serial.print("connecting");
+ while (WiFi.status() != WL_CONNECTED) {
+ Serial.print(".");
+ delay(500);
+ }
+ Serial.println();
+ Serial.print("connected: ");
+ Serial.println(WiFi.localIP());
+ Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+}
+int n = 0;
+void loop() {
+ inputVal0 = digitalRead(ProxSensor0);
+ inputVal1 = digitalRead(ProxSensor1);
+ inputVal2 = digitalRead(ProxSensor2);
+ inputVal3 = digitalRead(ProxSensor3);
+ Serial.println(inputVal0);
+ Serial.println(inputVal1);
+ Serial.println(inputVal2);
+ Serial.println(inputVal3);
+ // set value
+ Firebase.setInt("ir1", inputVal0);
+ Firebase.setInt("ir2",inputVal1);
+ Firebase.setInt("ir3",inputVal2);
+ Firebase.setInt("ir4",inputVal3);
+ // handle error
+ delay(1000);
+ // get value
+ Serial.print("ir1: ");
+ Serial.println(Firebase.getInt("ir1"));
+ Serial.print("ir2: ");
+ Serial.println(Firebase.getInt("ir2"));
+ Serial.print("ir3: ");
+ Serial.println(Firebase.getInt("ir3"));
+ Serial.print("ir4: ");
+ Serial.println(Firebase.getInt("ir4"));
+ delay(1000);
+ if (Firebase.failed()) {
+ Serial.print("setting /message failed:");
+ Serial.println(Firebase.error());
+ return;
+ }
+ delay(1000);
+ // append a new value to /logs
+ // handle error
+ if (Firebase.failed()) {
+ Serial.print("pushing /logs failed:");
+ Serial.println(Firebase.error());
+ return;
+ }
+ delay(1000);
+} 
